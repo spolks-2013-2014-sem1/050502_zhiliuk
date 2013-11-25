@@ -25,14 +25,24 @@ class Xsocket
     client, client_addrinfo = @socket.accept
     begin
       code.call(client)
+    rescue Errno::ECONNRESET => e
+      puts 'Client disconnected' + e.msg
+    rescue Errno::EPIPE => e
+      puts 'Client disconnected' + e.msg
     end
+    puts 'File Received'
     return
   end
 
   def connect(&code)
     @socket.connect(@sockaddr)
-    puts 'Connected...'
-    code.call(@socket)
+    begin
+      puts 'Connected...'
+      code.call(@socket)
+    rescue Errno::EPIPE => e
+      puts 'Server disconnected' + e.msg
+    end
+    puts 'File sended'
   end
 
   def receive_file(output_path)
