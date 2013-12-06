@@ -20,7 +20,7 @@ class Xsocket
   def listen(&code)
     @socket.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR, true)
     @socket.bind(@sockaddr)
-    @socket.listen(5)
+    @socket.listen(1)
     puts 'Listening...'
     client, client_addrinfo = @socket.accept
     begin
@@ -30,7 +30,6 @@ class Xsocket
     rescue Errno::EPIPE => e
       puts 'Client disconnected' + e.msg
     end
-    puts 'File Received'
     return
   end
 
@@ -42,33 +41,10 @@ class Xsocket
     rescue Errno::EPIPE => e
       puts 'Server disconnected' + e.msg
     end
-    puts 'File sended'
   end
-
-  def receive_file(output_path)
-    f = File.open(output_path, 'w')
-    self.listen do |sock|
-      while data = sock.read(@chunk_size)
-        f.write(data)
-      end
-    end
-    return
-  end
-
-  def send_file(input_path)
-    f = File.open(input_path, 'r')
-    self.connect do |sock|
-      while !f.eof?
-        data = f.read(@chunk_size)
-        sock.write(data)
-      end
-    end
-    return
-  end
-
 
   def close
-    @socket.close
+    @socket.close if @socket
   end
 
 end
